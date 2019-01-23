@@ -31,4 +31,4 @@ K=5, Got 151 / 500 correct => accuracy: 0.302000
 
 
 
-####-------- k_nearest_neighbor.py, knn.ipynb updated 2019-01-23 --------
+#### -------- k_nearest_neighbor.py, knn.ipynb updated 2019-01-23 --------
