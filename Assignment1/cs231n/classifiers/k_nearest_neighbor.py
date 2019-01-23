@@ -162,8 +162,8 @@ class KNearestNeighbor(object):
       # Store this label in y_pred[i]. Break ties by choosing the smaller     #
       # label.                                                                #
       #########################################################################
-      countArr = np.bincount(closest_y[0]) #The most frequent label을 bincout를 통해 할당하고, argmax사용하여, majority vote 수행
-      y_pred[i]= np.array(countArr).argmax()
+      countArr = np.bincount(closest_y[0]) #The most frequent label을 bincout를 통해 할당
+      y_pred[i]= np.array(countArr).argmax() #argmax사용하여, majority vote 수행
 
       #########################################################################
       #                           END OF YOUR CODE                            # 
