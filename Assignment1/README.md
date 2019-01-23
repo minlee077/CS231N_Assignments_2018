@@ -8,14 +8,18 @@
 ## 2. Subsampling 
 
 Training data shape:  (50000, 32, 32, 3)
+
 Training labels shape:  (50000,)
+
 Test data shape:  (10000, 32, 32, 3)
+
 Test labels shape:  (10000,)
 
 ## 3. Accuracy
 
-### K=1, Got 145 / 500 correct => accuracy: 0.290000
-### K=5, Got 151 / 500 correct => accuracy: 0.302000
+K=1, Got 145 / 500 correct => accuracy: 0.290000
+
+K=5, Got 151 / 500 correct => accuracy: 0.302000
 
 
 
