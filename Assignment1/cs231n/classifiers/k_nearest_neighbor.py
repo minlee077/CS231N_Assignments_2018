@@ -71,10 +71,12 @@ class KNearestNeighbor(object):
         # training point, and store the result in dists[i, j]. You should   #
         # not use a loop over dimension.                                    #
         #####################################################################
-        dists[i,j] = np.sqrt(np.sum(np.abs(self.X_train[j]-X[i])))
+        dists[i,j] = np.sqrt(np.sum(np.square(self.X_train[j]-X[i])))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
+    print(dists)
+
     return dists
 
   def compute_distances_one_loop(self, X):
@@ -93,10 +95,12 @@ class KNearestNeighbor(object):
       # Compute the l2 distance between the ith test point and all training #
       # points, and store the result in dists[i, :].                        #
       #######################################################################
-      dists[i] = np.sqrt(np.sum(np.square(self.X_train-X[i,:])))
+      dists[i] = np.sqrt(np.sum(np.square(self.X_train-X[i]),axis=1)) # axis =1 (column) 기준으로 vectorized하여, dists에 저장
       #######################################################################
       #                         END OF YOUR CODE                            #
       #######################################################################
+
+    print(dists)
     return dists
 
   def compute_distances_no_loops(self, X):
@@ -121,7 +125,18 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    dists = np.sqrt(np.sum(np.square(self.X_train-X)))
+    X_Tt=self.X_train.transpose()
+    tempX = np.matmul(X,np.ones(X_Tt.shape))
+    tempX_Train = np.matmul(-np.ones(X.shape),X_Tt,)
+
+
+    print(tempX)
+    print(tempX_Train)
+
+    dists = np.abs(tempX+tempX_Train)
+    print(dists)
+
+
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
