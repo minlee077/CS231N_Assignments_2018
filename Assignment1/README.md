@@ -15,20 +15,13 @@ Test data shape:  (10000, 32, 32, 3)
 
 Test labels shape:  (10000,)
 
-## 3. Accuracy
+## 3. Performance
+K=1, Got 137 / 500 correct => accuracy: 0.274000
+K=5, Got 139 / 500 correct => accuracy: 0.278000
 
-K=1, Got 145 / 500 correct => accuracy: 0.290000
-
-K=5, Got 151 / 500 correct => accuracy: 0.302000
-
-
-
+Final choice(Based on cross validation)
+K=6, Got 141 / 500 correct => accuracy: 0.282000
 
 
 
-
-
-
-
-
-#### -------- k_nearest_neighbor.py, knn.ipynb updated 2019-01-23 --------
+#### -------- k_nearest_neighbor.py, knn.ipynb updated 2019-01-23,25 --------
