@@ -75,8 +75,6 @@ class KNearestNeighbor(object):
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
-    print(dists)
-
     return dists
 
   def compute_distances_one_loop(self, X):
@@ -100,7 +98,6 @@ class KNearestNeighbor(object):
       #                         END OF YOUR CODE                            #
       #######################################################################
 
-    print(dists)
     return dists
 
   def compute_distances_no_loops(self, X):
@@ -125,17 +122,13 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    X_Tt=self.X_train.transpose()
-    tempX = np.matmul(X,np.ones(X_Tt.shape))
-    tempX_Train = np.matmul(-np.ones(X.shape),X_Tt,)
 
-
-    print(tempX)
-    print(tempX_Train)
-
-    dists = np.abs(tempX+tempX_Train)
-    print(dists)
-
+    dists = np.sqrt((X**2).sum(axis=1, keepdims=True) + (self.X_train**2).sum(axis=1) - 2 * X.dot(self.X_train.T))
+    
+    #(x-y)^2 을 x^2+y^2-2xy를 통해 표현했다.
+    #위 표현의 장점은 (x-y)^2를 수행할 경우, x-y가 서로 차원이 다르므로 올바르게 수행되지 않는다.
+    #x^2과 y^2을 각각 상응하는 행과 열에 대해 만들어내고, 
+    #이를 원하는 사이즈인 test x train의 shape를 가지는 X.dot(X_train.T)과 브로드 캐스팅을 이용하여 덧셈연산을 수행하면, dists matrix가 생성된다.
 
     #########################################################################
     #                         END OF YOUR CODE                              #
