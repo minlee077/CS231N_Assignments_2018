@@ -27,23 +27,24 @@ def svm_loss_naive(W, X, y, reg):
   loss = 0.0
   for i in range(num_train):
     scores = X[i].dot(W)
-    correct_class_score = scores[y[i]]
+    correct_class_score = scores[y[i]] # label socre
     for j in range(num_classes):
-      if j == y[i]:
+      if j == y[i]: # 올바르게 분류하지 않은 클래스들에 대해서만 loss를 누적한다.
         continue
       margin = scores[j] - correct_class_score + 1 # note delta = 1
-      if margin > 0:
+      if margin > 0: # score와 correct class score와의 차이가 delta(1)보다 클때
         loss += margin
-        dW[:, j] += X[i]
-        dW[:, y[i]] -= X[i]
+        dW[:, j] += X[i] # 올바르지 않은 클래스에 대해서는 기존에 X[i]만큼 gradient를 증가
+        dW[:, y[i]] -= X[i] # 올바르게 분류한 경우에 대해서는 X[i]만큼 gradient감소  loss = ∑max(W[:,j]x[j]- W[:,y[i]]x[i] + delta)이므로, dL/dw는 이와 같이 된다.
 
   # Right now the loss is a sum over all training examples, but we want it
   # to be an average instead so we divide by num_train.
   loss /= num_train
+  dW /= num_train
 
   # Add regularization to the loss.
   loss += reg * np.sum(W * W)
-
+  dW += reg * 2*W
   #############################################################################
   # TODO:                                                                     #
   # Compute the gradient of the loss function and store it dW.                #
@@ -52,10 +53,6 @@ def svm_loss_naive(W, X, y, reg):
   # loss is being computed. As a result you may need to modify some of the    #
   # code above to compute the gradient.                                       #
   #############################################################################
-
-  
-
-
   return loss, dW
 
 
@@ -68,6 +65,9 @@ def svm_loss_vectorized(W, X, y, reg):
   loss = 0.0
   dW = np.zeros(W.shape) # initialize the gradient as zero
 
+  N = X.shape[0]
+
+
   delta = 1.0
   #############################################################################
   # TODO:                                                                     #
@@ -75,14 +75,24 @@ def svm_loss_vectorized(W, X, y, reg):
   # result in loss.                                                           #
   #############################################################################
 
-  scores = W.dot(X)
-  margins = np.maximum(0,scores-scores[y] + delta)
-  margins[y]
-  loss_i = np.sum(margins)
+  scores =np.array(X.dot(W))
+  correct_scores = scores[np.arange(N), y]  # (N, ) label to score
+  margins = np.maximum(0,scores-correct_scores.reshape(N,1) + delta) # 모든 row(batch size = N)에 대해 correct score를 차감
+  margins[range(N),y]=0 # 올바른 label에 대한 margin은 0으로 수정 
+  loss = np.sum(margins) / N
+  loss += reg*np.sum(W*W)
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
+  dS = np.zeros(scores.shape)
+  dS[margins > 0] = 1 
+  dS[np.arange(N), y] -= np.sum(dS, axis=1)   #  (N, 1) = (N, 1)
 
+  
+  dW = np.dot(X.T,dS)
+  dW /=N
+  dW +=2*reg*W
 
   #############################################################################
   # TODO:                                                                     #
