@@ -33,7 +33,7 @@ class LinearClassifier(object):
     if self.W is None:
       # lazily initialize W
       self.W = 0.001 * np.random.randn(dim, num_classes)
-
+    lastX, lasty = None,None
     # Run stochastic gradient descent to optimize W
     loss_history = []
     for it in range(num_iters):
@@ -61,7 +61,7 @@ class LinearClassifier(object):
       # evaluate loss and gradient
       loss, grad = self.loss(X_batch, y_batch, reg)
       loss_history.append(loss)
-
+      lastX, lasty = X_batch, y_batch
       # perform parameter update
       #########################################################################
       # TODO:                                                                 #
@@ -73,7 +73,7 @@ class LinearClassifier(object):
       #########################################################################
       #                       END OF YOUR CODE                                #
       #########################################################################
-
+      
       if verbose and it % 100 == 0:
         print('iteration %d / %d: loss %f' % (it, num_iters, loss))
 
@@ -99,8 +99,9 @@ class LinearClassifier(object):
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
     
-    np.argmax(X.dot(self.W),axis=1)
 
+
+    y_pred = np.argmax(X.dot(self.W),axis=1)
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
