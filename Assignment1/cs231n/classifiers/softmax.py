@@ -35,18 +35,19 @@ def softmax_loss_naive(W, X, y, reg):
     dotOutput=X[i].dot(W)
     dotOutput -= np.max(dotOutput) # 연산 안정성을 위해 shift 
     correct_predict = dotOutput[y[i]]
-    exp_sum = np.sum(np.exp(dotOutput))
-    exp_cor = np.exp(correct_predict)
-    estimation = exp_cor/ exp_sum # exp and normalize
-    losses[i]=-np.log(estimation)
+    exp_dot = np.exp(dotOutput) # 1*D s=Wx
+    exp_sum = np.sum(exp_dot) # ∑e^s_k
+    exp_cor = np.exp(correct_predict) # e^s_y[i]
+    estimation = exp_cor/ exp_sum # exp and normalize # e^s_y[i]/∑e^s_k
+    losses[i]=-np.log(estimation) # loss = ∑-log(est_i)/N
 
-  #gradient 
+  #gradient
     dW[:,y[i]] += (-1) * (exp_sum - exp_cor)/exp_sum * X[i] #only for label column
     for j in range(num_classes):
       if(y[i]!=j):
-        dW[:, j] += np.exp(dotOutput[j]) / exp_sum * X[i]
+        dW[:, j] += exp_dot[j] / exp_sum * X[i]
   # dW[:,y[i]] += (∑ - e^s_yi )/∑ * x[i]
-  # dW[:, j ] += e^s_j / ∑ * x[i] (*y[i]!=j)
+  # dW[:, j ] += e^s_xj / ∑ * x[i] (*y[i]!=j)
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
