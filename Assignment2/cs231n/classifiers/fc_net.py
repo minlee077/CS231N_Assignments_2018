@@ -179,7 +179,6 @@ class FullyConnectedNet(object):
         self.num_layers = 1 + len(hidden_dims)
         self.dtype = dtype
         self.params = {}
-        np.sum(1)
 
         ############################################################################
         # TODO: Initialize the parameters of the network, storing all values in    #
@@ -193,7 +192,15 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to ones and shift     #
         # parameters should be initialized to zeros.                               #
         ############################################################################
-        pass
+        
+        dimSequence = np.hstack((input_dim,hidden_dims,num_classes)) # [N, H1, H2, H3, ... ,Hk, C] # hindden은 총 k+1개 존재
+        for i in range(self.num_layers):
+          self.params['W%d' %(i+1)] = np.random.randn(dimSequence[i],dimSequence[i+1]) * weight_scale # (Hi,Hi+1) for W_i+1 (H0 = N)
+          self.params['b%d'%(i+1)] = np.zeros(dimSequence[i+1]) # (Hi+1,)
+          if self.normalization in ['batchnorm', 'layernorm']:
+            self.params['gamma%d'%(i+1)] = np.ones(hidden_dims[i])#scale parameters
+            self.params['beta%d'%(i+1)] = np.zeros(hidden_dims[i])#shift parameters
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -252,7 +259,27 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        pass
+        scores = X
+        caches=[]
+        for i in range(self.num_layers-1): # for affine foward
+          scores, cacheAf =affine_forward(scores,
+                                          self.params['W%d' %(i+1)],
+                                          self.params['b%d' %(i+1)])
+          
+          #norm layer
+          if self.normalization=='batchnorm':
+            pass
+          elif self.normalization=='layernorm':
+            pass
+          else:
+            pass
+
+          #reLU
+
+          #dropOut
+
+        #final layer (affine + softmax)
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
