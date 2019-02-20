@@ -186,7 +186,29 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # Referencing the original paper (https://arxiv.org/abs/1502.03167)   #
         # might prove to be helpful.                                          #
         #######################################################################
-        pass
+        
+        mu = np.mean(x,axis=0)
+        var = np.sum((x-mu)**2,axis =0) / N
+        
+        #normalize input 
+        x_hat = (x-mu)/np.sqrt(var + eps)
+
+        #y = γ * x_hat + β (shift and scale)
+        y = gamma*x_hat + beta # (N,D) + (D,)
+
+        out = x_hat # (N,D)
+
+        running_mean = momentum * running_mean + (1-momentum) * mu
+        running_var = momentum * running_var + (1-momentum) * var
+
+        cache = {}
+        cache['x_hat']=x_hat
+        cache['mu']=mu
+        cache['var']=var
+        cache['eps']=eps
+        cache['gamma']=gamma
+        cache['beta']=beta
+        cache['x']=x
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -197,7 +219,17 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        
+        #normalize input
+        x_hat = (x - running_mean) / np.sqrt(running_var+eps)
+
+        #y = γ * x_hat + β (shift and scale)
+        y = gamma*x_hat + beta 
+
+        out = y #(N,D)
+
+        #During test time, Don't have to caching. Because BP only happen during training time
+
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -235,7 +267,21 @@ def batchnorm_backward(dout, cache):
     # Referencing the original paper (https://arxiv.org/abs/1502.03167)       #
     # might prove to be helpful.                                              #
     ###########################################################################
-    pass
+    x_hat = cache['x_hat']
+    mu = cache['mu']
+    var = cache['var']
+    eps = cache['eps']
+    gamma = cache['gamma']
+    beta = cache['beta']
+    x = cache['x']
+
+    dbeta = dout.sum(axis=0)
+    dgamma = (x_hat*dout).sum(axis=0) # dout  (N,D)
+
+    #have to calc dx...
+
+
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
