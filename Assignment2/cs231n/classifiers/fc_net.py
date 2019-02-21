@@ -260,26 +260,43 @@ class FullyConnectedNet(object):
         # layer, etc.                                                              #
         ############################################################################
         scores = X
-        caches=[]
-        for i in range(self.num_layers-1): # for affine foward
-          scores, cacheAf =affine_forward(scores,
+        caches={}
+        
+        for i in range(self.num_layers-1): # for affine foward (L-1 time)
+          scores, cacheAF =affine_forward(scores,
                                           self.params['W%d' %(i+1)],
                                           self.params['b%d' %(i+1)])
           
           #norm layer
           if self.normalization=='batchnorm':
-            pass
+            scores,cacheNorm =batchnorm_forward(scores,
+                                              self.params['gamma%d' %(i+1)],
+                                              self.params['beta%d'%(i+1)],
+                                              bn_param[mode])
           elif self.normalization=='layernorm':
             pass
           else:
             pass
 
-          #reLU
+          #ReLU
 
           #dropOut
 
-        #final layer (affine + softmax)
 
+          cache = {}
+          cache['Affine'] =cacheAF
+          if cacheNorm!=None :
+            cache['Norm'] = cacheNorm
+          cache['ReLU'] = cacheReLU
+          if cacheDropOut!=None:
+            cache['dropout'] = cacheDropOut
+
+          caches['layer%d'%(i+1)]= cache
+
+          
+        #final layer (affine + softmax)
+        
+        caches['layer%d'%()]
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
