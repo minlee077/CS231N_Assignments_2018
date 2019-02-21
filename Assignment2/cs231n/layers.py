@@ -274,14 +274,35 @@ def batchnorm_backward(dout, cache):
     gamma = cache['gamma']
     beta = cache['beta']
     x = cache['x']
+    N, D = x.shape
 
     dbeta = dout.sum(axis=0)
     dgamma = (x_hat*dout).sum(axis=0) # dout  (N,D)
 
-    #have to calc dx...
+    #have to calc dx
+    dx_hat = gamma * dout  # (N,D)
+    
+    dreversed_sqrt_var = np.sum((dx_hat * (x-mu)),axis=0) # (D,)
+    dxmu1 = dx_hat* 1/np.sqrt(var+eps) # for d(x-mu) #(N,D)
+    
+    dsqrt_var = -1./dreversed_sqrt_var **2  # d(1/x) = -1/x^2
 
+    dvar = 1/2 * 1/dreversed_sqrt_var(var+eps) *dsqrt_var
 
+    dsquare = 1. /N * np.ones((N,D)) * dvar # d(1/n∑x_i)
 
+    dxmu2 = 2*(x-mu)*dsquare
+
+    dxmu = dxmu1+dxmu2 # d(x-mu)/dout
+
+    dx1 = dxmu
+    dmu = np.sum(dxmu,axis =0)
+
+    dx2 = 1/N *np.ones(N,D) * dmu
+
+    dx = dx1+dx2
+
+    dvar = dsqrt_var*1/2 #d(√var) = 1/2var
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
