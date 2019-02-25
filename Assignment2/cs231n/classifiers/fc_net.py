@@ -194,13 +194,16 @@ class FullyConnectedNet(object):
         ############################################################################
         
         dimSequence = np.hstack((input_dim,hidden_dims,num_classes)) # [N, H1, H2, H3, ... ,Hk, C] # hindden은 총 k+1개 존재
-        for i in range(self.num_layers):
+        for i in range(self.num_layers-1):
           self.params['W%d' %(i+1)] = np.random.randn(dimSequence[i],dimSequence[i+1]) * weight_scale # (Hi,Hi+1) for W_i+1 (H0 = N)
-          self.params['b%d'%(i+1)] = np.zeros(dimSequence[i+1]) # (Hi+1,)
-          if self.normalization in ['batchnorm', 'layernorm']:
+          self.params['b%d'%(i+1)] = np.zeros(dimSequence[i+1]) # (Hi+1,) 
+          if self.normalization != None:
             self.params['gamma%d'%(i+1)] = np.ones(hidden_dims[i])#scale parameters
             self.params['beta%d'%(i+1)] = np.zeros(hidden_dims[i])#shift parameters
 
+        i+=1  
+        self.params['W%d' %(i+1)] = np.random.randn(dimSequence[i],dimSequence[i+1]) * weight_scale # (Hi,Hi+1) for W_i+1 (H0 = N)
+        self.params['b%d'%(i+1)] = np.zeros(dimSequence[i+1]) # (Hi+1,) 
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -222,8 +225,11 @@ class FullyConnectedNet(object):
         self.bn_params = []
         if self.normalization=='batchnorm':
             self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]
+
+
         if self.normalization=='layernorm':
             self.bn_params = [{} for i in range(self.num_layers - 1)]
+
 
         # Cast all parameters to the correct datatype
         for k, v in self.params.items():
@@ -273,7 +279,7 @@ class FullyConnectedNet(object):
             scores,cacheNorm =batchnorm_forward(scores,
                                               self.params['gamma%d' %(i+1)],
                                               self.params['beta%d'%(i+1)],
-                                              bn_param)
+                                              self.bn_params[i])
           elif self.normalization=='layernorm':
             pass
 
@@ -296,7 +302,7 @@ class FullyConnectedNet(object):
 
           
         #final layer (affine)
-
+        
         scores, cacheAF =affine_forward(scores,
                                 self.params['W%d' %(self.num_layers)],
                                 self.params['b%d' %(self.num_layers)])
@@ -326,8 +332,11 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
+        
         dataloss, dl=softmax_loss(scores,y)
+        
         l2Reg = 0.5 * self.reg*np.sum(self.params['W%d' % (self.num_layers)] ** 2)
+
         for i in range(self.num_layers-1):
           l2Reg+=0.5*self.reg*np.sum(self.params['W%d'%(i+1)]**2)
         loss = dataloss + l2Reg
@@ -339,7 +348,6 @@ class FullyConnectedNet(object):
         while i>=0:
           if self.use_dropout:
             dl = dropout_backward(dl, cahces['layer%d'%(i+1)]['dropout'])
-          # print('W%d'%(i+1))
           dl = relu_backward(dl,caches['layer%d'%(i+1)]['relu'])
 
           if self.normalization=='batchnorm':
