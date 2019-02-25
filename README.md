@@ -3,4 +3,5 @@
 
 
 
-#### -------- Assignment1 - k_nearest_neighbor.py, knn.ipynb updated 2019-01-23,25 --------
+#### -------- Assignment1 was completed--------
+#### -------- Assignment2 is underway...--------
