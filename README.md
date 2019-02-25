@@ -1,6 +1,6 @@
-# CS231N_Assignment
+# CS231N_Assignment_2018
 
-#### URL : http://cs231n.github.io/
+#### Details about this assignment can be found [on the course webpage](http://cs231n.github.io/)
 
 
 #### -------- Assignment1 was completed--------
