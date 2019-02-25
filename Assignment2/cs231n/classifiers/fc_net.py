@@ -288,7 +288,7 @@ class FullyConnectedNet(object):
           #dropOut
           if self.use_dropout:
             scores, cacheDropOut = dropout_forward(scores,
-                                                  dropout_param)
+                                                  self.dropout_param)
           cache = {}
           cache['affine'] =cacheAF
           if cacheNorm!=None :
@@ -347,7 +347,7 @@ class FullyConnectedNet(object):
 
         while i>=0:
           if self.use_dropout:
-            dl = dropout_backward(dl, cahces['layer%d'%(i+1)]['dropout'])
+            dl = dropout_backward(dl, caches['layer%d'%(i+1)]['dropout'])
           dl = relu_backward(dl,caches['layer%d'%(i+1)]['relu'])
 
           if self.normalization=='batchnorm':
