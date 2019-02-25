@@ -1,6 +1,7 @@
-# CS231N_Assignment
+# CS231N_Assignment_2018
+
+#### Details about this assignment can be found [on the course webpage](http://cs231n.github.io/)
 
 
-
-
-#### -------- Assignment1 - k_nearest_neighbor.py, knn.ipynb updated 2019-01-23,25 --------
+#### -------- Assignment1 was completed--------
+#### -------- Assignment2 is underway...--------

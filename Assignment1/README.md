@@ -1,4 +1,4 @@
-#Details about this assignment can be found [on the course webpage](http://cs231n.github.io/), under Assignment #1 of Spring 2017.
+#Details about this assignment can be found [on the course webpage](http://cs231n.github.io/), under Assignment #1 of Spring 2018.
 
 
 # 1. KNN Classifier
@@ -24,4 +24,4 @@ K=6, Got 141 / 500 correct => accuracy: 0.282000
 
 
 
-#### -------- k_nearest_neighbor.py, knn.ipynb updated 2019-01-23,25 --------
+#### -------- To be modified... --------
