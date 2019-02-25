@@ -25,10 +25,11 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
-    N=x.shape[0]
-    vectorizedX=x.reshape(N,-1) #(N, d_1,d_2,...,d_k) -> (N, D)
+    n=x.shape[0]
+    vectorizedX=x.reshape(n,-1) #(N, d_1,d_2,...,d_k) -> (N, D)
     wx=vectorizedX.dot(w) # (N,M)
     out = wx+b
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -187,28 +188,23 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # might prove to be helpful.                                          #
         #######################################################################
         
-        mu = np.mean(x,axis=0)
-        var = np.sum((x-mu)**2,axis =0) / N
-        
+        mu = np.mean(x,axis=0) # (D, )
+        var = np.sum((x-mu)**2,axis =0) / N #(D, )
+
         #normalize input 
         x_hat = (x-mu)/np.sqrt(var + eps)
+
 
         #y = γ * x_hat + β (shift and scale)
         y = gamma*x_hat + beta # (N,D) + (D,)
 
-        out = x_hat # (N,D)
+        out = y # (N,D)
 
         running_mean = momentum * running_mean + (1-momentum) * mu
         running_var = momentum * running_var + (1-momentum) * var
 
-        cache = {}
-        cache['x_hat']=x_hat
-        cache['mu']=mu
-        cache['var']=var
-        cache['eps']=eps
-        cache['gamma']=gamma
-        cache['beta']=beta
-        cache['x']=x
+
+        cache = (x_hat, mu, var, eps, gamma, beta, x)
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -267,42 +263,36 @@ def batchnorm_backward(dout, cache):
     # Referencing the original paper (https://arxiv.org/abs/1502.03167)       #
     # might prove to be helpful.                                              #
     ###########################################################################
-    x_hat = cache['x_hat']
-    mu = cache['mu']
-    var = cache['var']
-    eps = cache['eps']
-    gamma = cache['gamma']
-    beta = cache['beta']
-    x = cache['x']
+
+    x_hat, mu, var, eps, gamma, beta, x = cache
     N, D = x.shape
 
     dbeta = dout.sum(axis=0)
     dgamma = (x_hat*dout).sum(axis=0) # dout  (N,D)
 
-    #have to calc dx
+    #now have to calc dx
     dx_hat = gamma * dout  # (N,D)
     
     dreversed_sqrt_var = np.sum((dx_hat * (x-mu)),axis=0) # (D,)
     dxmu1 = dx_hat* 1/np.sqrt(var+eps) # for d(x-mu) #(N,D)
-    
-    dsqrt_var = -1./dreversed_sqrt_var **2  # d(1/x) = -1/x^2
 
-    dvar = 1/2 * 1/dreversed_sqrt_var(var+eps) *dsqrt_var
+    dsqrt_var = -1./ (np.sqrt(var+eps)**2)* dreversed_sqrt_var  # d(1/x) = -1/x^2
+
+    dvar = 1/2 * 1/np.sqrt(var+eps)*dsqrt_var # d(√x)=(1/2 *1/√x)
 
     dsquare = 1. /N * np.ones((N,D)) * dvar # d(1/n∑x_i)
 
     dxmu2 = 2*(x-mu)*dsquare
 
-    dxmu = dxmu1+dxmu2 # d(x-mu)/dout
+    dxmu = dxmu1+dxmu2 # d(x-mu)
 
-    dx1 = dxmu
-    dmu = np.sum(dxmu,axis =0)
+    dx1 = dxmu # dx = d(x-mu)
+    dmu = -np.sum(dxmu,axis =0) 
 
-    dx2 = 1/N *np.ones(N,D) * dmu
+    dx2 = 1/N *np.ones([N,D]) * dmu
 
     dx = dx1+dx2
 
-    dvar = dsqrt_var*1/2 #d(√var) = 1/2var
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
