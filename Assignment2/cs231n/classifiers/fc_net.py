@@ -277,11 +277,15 @@ class FullyConnectedNet(object):
           #norm layer
           if self.normalization=='batchnorm':
             scores,cacheNorm =batchnorm_forward(scores,
-                                              self.params['gamma%d' %(i+1)],
-                                              self.params['beta%d'%(i+1)],
-                                              self.bn_params[i])
+                                                self.params['gamma%d' %(i+1)],
+                                                self.params['beta%d'%(i+1)],
+                                                self.bn_params[i])
           elif self.normalization=='layernorm':
-            pass
+            scores, cacheNorm = layernorm_forward(scores,
+                                                  self.params['gamma%d'%(i+1)],
+                                                  self.params['beta%d'%(i+1)],
+                                                  self.bn_params[i])
+
 
           #ReLU
           scores, cacheReLU = relu_forward(scores)
@@ -353,7 +357,7 @@ class FullyConnectedNet(object):
           if self.normalization=='batchnorm':
             dl, grads['gamma%d' % (i + 1)], grads['beta%d' % (i + 1)] = batchnorm_backward(dl, caches['layer%d'%(i+1)]['norm'])
           elif self.normalization=='layernorm':
-            pass
+            dl, grads['gamma%d' % (i + 1)], grads['beta%d' % (i + 1)] = layernorm_backward(dl, caches['layer%d'%(i+1)]['norm'])
 
           dl, grads['W%d' % (i + 1)], grads['b%d' % (i + 1)] = affine_backward(dl, caches['layer%d'%(i+1)]['affine'])
           
