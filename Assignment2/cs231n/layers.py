@@ -365,7 +365,23 @@ def layernorm_forward(x, gamma, beta, ln_param):
     # transformations you could perform, that would enable you to copy over   #
     # the batch norm code and leave it almost unchanged?                      #
     ###########################################################################
-    pass
+    N = x.shape[0]
+    D = x.shape[1]
+    mu = np.mean(x,axis=1) # (N, )
+    mu=mu.reshape(N,1)#(N,1)
+
+    var = np.sum((x-mu)**2,axis = 1) / D #(N,)
+    var=var.reshape(N,1) #(N,1)
+    
+    #normalize input 
+    x_hat = (x-mu) / np.sqrt(var + eps) # (N,D) / (N,1)
+
+    #y = γ * x_hat + β (shift and scale)
+    y = gamma*x_hat + beta # (N,D)
+
+    out = y # (N,D)
+
+    cache = (x_hat, mu, var, eps, gamma, beta, x)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -396,7 +412,37 @@ def layernorm_backward(dout, cache):
     # implementation of batch normalization. The hints to the forward pass    #
     # still apply!                                                            #
     ###########################################################################
-    pass
+
+    x_hat, mu, var, eps, gamma, beta, x = cache
+    N, D = x.shape
+
+    dbeta = dout.sum(axis=0)
+    dgamma = (x_hat*dout).sum(axis=0) # dout  (N,D)
+
+    #now have to calc dx
+    dx_hat = gamma * dout  # (N,D)
+    
+    dreversed_sqrt_var = np.sum((dx_hat * (x-mu)),axis=1) # (N,)
+    dreversed_sqrt_var=dreversed_sqrt_var.reshape(N,1)
+    dxmu1 = dx_hat* 1/np.sqrt(var+eps) # for d(x-mu) #(N,D)
+
+    dsqrt_var = -1./ (np.sqrt(var+eps)**2)* dreversed_sqrt_var  # d(1/x) = -1/x^2
+
+    dvar = 1/2 * 1/np.sqrt(var+eps)*dsqrt_var # d(√x)=(1/2 *1/√x)
+
+    dsquare = 1. /D * np.ones((N,D)) * dvar # d(1/n∑x_i)
+
+    dxmu2 = 2*(x-mu)*dsquare
+
+    dxmu = dxmu1+dxmu2 # d(x-mu)
+
+    dx1 = dxmu # dx = d(x-mu)
+    dmu = -np.sum(dxmu,axis =1).reshape(N,1)
+
+    dx2 = 1/D *np.ones([N,D]) * dmu
+
+    dx = dx1+dx2
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
