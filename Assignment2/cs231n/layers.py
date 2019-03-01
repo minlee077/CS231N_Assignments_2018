@@ -565,7 +565,26 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    N, C, H, W=x.shape
+    F, _, HH,WW =w.shape
+    stride = conv_param.get('stride')
+    pad = conv_param.get('pad')
+    
+    H_p = 1 + (H + 2 * pad - HH) // stride #get only quotient
+    W_p = 1 + (W + 2 * pad - WW) // stride
+
+    out = np.zeros((N,F,H_p,W_p))
+
+    #pading
+    x_pad = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant', constant_values=0) #zero padding
+
+    #convolution
+    for n in range(N): #each data
+        for f in range(F): #each filter
+            for j in range(0, H_p):
+                for i in range(0, W_p):
+                    out[n][f][j][i] = (x_pad[n][:, j*stride:j*stride+HH, i*stride:i*stride+WW] * w[f][:,:,:]).sum() + b[f]
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -590,7 +609,35 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    x, w , b ,conv_param=cache
+    N, C, H, W =x.shape
+    F, _, HH,WW =w.shape
+    stride = conv_param['stride']
+    pad = conv_param['pad']
+    H_p = 1 + (H + 2 * pad - HH) // stride
+    W_p = 1 + (W + 2 * pad - WW) // stride
+
+
+    #padding
+    x_pad = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant', constant_values=0)
+
+    #Backpropagation
+    dx_pad = np.zeros_like(x_pad)
+    dx = np.zeros_like(x) # (N,C,H,W)
+    dw = np.zeros_like(w) # (F,C,HH,WW)
+    db = np.zeros_like(b) # (F,)
+
+    for n in range(N):#each data
+        for f in range(F):#each filter
+            db[f] += dout[n, f].sum() # (F,)
+            for j in range(0, H_p):
+                for i in range(0, W_p):
+                    dw[f] += x_pad[n, :, j * stride:j * stride + HH, i * stride:i * stride + WW] * dout[n, f, j, i]
+                    dx_pad[n, :, j * stride:j * stride + HH, i * stride:i * stride + WW] += w[f,:,:,:] * dout[n, f, j, i]
+
+    dx = dx_pad[:, :, pad:pad+H, pad:pad+W]
+
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
