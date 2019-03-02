@@ -53,7 +53,37 @@ class ThreeLayerConvNet(object):
         # **the width and height of the input are preserved**. Take a look at      #
         # the start of the loss() function to see how that happens.                #                           
         ############################################################################
-        pass
+        """
+        - x: Input data of shape (N, C, H, W)
+        - w: Filter weights of shape (F, C, HH, WW)
+        - b: Biases, of shape (F,)
+        - conv_param: A dictionary with the following keys:
+        - 'stride': The number of pixels between adjacent receptive fields in the
+            horizontal and vertical directions.
+        - 'pad': The number of pixels that will be used to zero-pad the input. 
+        
+        Convolution Output:
+        - out: Output data, of shape (N, F, H', W') where H' and W' are given by
+        H' = 1 + (H + 2 * pad - HH) / stride
+        W' = 1 + (W + 2 * pad - WW) / stride  
+        """        
+        C, H, W =input_dim
+        F, HH, WW = num_filters, filter_size, filter_size
+        D=hidden_dim
+        
+
+        self.params['W1'] = np.random.randn(F, C, HH, WW)*weight_scale
+        self.params['b1'] = np.zeros((F,))
+
+        # We have to assume that the padding and stride of the first convolutional layer are chosen 
+        # so that the width and height of the input are preserved.
+        # And also 2x2 max pool makes the width and height reduce by half.
+        self.params['W2'] = np.random.randn(F*(H//2)*(W//2),D)*weight_scale
+        self.params['b2'] = np.zeros((D,))
+
+        self.params['W3'] = np.random.randn(D,num_classes)*weight_scale
+        self.params['b3'] = np.zeros((num_classes,))
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -76,7 +106,7 @@ class ThreeLayerConvNet(object):
         # Padding and stride chosen to preserve the input spatial size
         filter_size = W1.shape[2]
         conv_param = {'stride': 1, 'pad': (filter_size - 1) // 2}
-
+        
         # pass pool_param to the forward pass for the max-pooling layer
         pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
 
@@ -89,7 +119,10 @@ class ThreeLayerConvNet(object):
         # Remember you can use the functions defined in cs231n/fast_layers.py and  #
         # cs231n/layer_utils.py in your implementation (already imported).         #
         ############################################################################
-        pass
+        c_r_p_out, c_r_p_cache=conv_relu_pool_forward(X,W1,b1,conv_param,pool_param)
+        a_r_f1_out, a_r_f1_cache=affine_relu_forward(c_r_p_out,W2,b2)
+        scores, scores_cache=affine_forward(a_r_f1_out,W3,b3)
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -108,9 +141,25 @@ class ThreeLayerConvNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        dataloss, dscores =softmax_loss(scores,y)
+        regloss = 1/2 * self.reg * (np.sum(W1**2)+np.sum(W2**2)+np.sum(W3**2))
+        loss = dataloss+regloss
+
+        dscores, dW3, db3=affine_backward(dscores,scores_cache)
+        dscores, dW2, db2=affine_relu_backward(dscores,a_r_f1_cache)
+        _, dW1, db1 = conv_relu_pool_backward(dscores,c_r_p_cache)
+
+        grads['W3']=dW3+ self.reg * W3
+        grads['b3']=db3
+        grads['W2']=dW2+ self.reg * W2
+        grads['b2']=db2
+        grads['W1']=dW1+ self.reg * W1
+        grads['b1']=db1
+        
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
 
         return loss, grads
+
