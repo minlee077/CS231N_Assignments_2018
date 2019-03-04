@@ -3,6 +3,6 @@
 #### Details about this assignment can be found [on the course webpage](http://cs231n.github.io/)
 
 
-#### -------- Assignment1 was completed--------
-#### -------- Assignment2 was completed--------
+#### -------- Assignment1 completed--------
+#### -------- Assignment2 completed--------
 #### -------- Assignment3 will be uploaded soon--------
