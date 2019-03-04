@@ -4,4 +4,5 @@
 
 
 #### -------- Assignment1 was completed--------
-#### -------- Assignment2 is underway...--------
+#### -------- Assignment2 was completed--------
+#### -------- Assignment3 will be uploaded soon--------
