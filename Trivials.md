@@ -1,3 +1,8 @@
+
+# Assignment2
+
+---
+
 Computational graph of Batch normalization
 It would be helpful when implementing batch normalization layer.
 
@@ -13,3 +18,5 @@ If You have any problems with running "Fast layers" on [ConvolutionalNetworks.ip
 Group Normalization explanation in Korean
 
 [Reference](https://blog.lunit.io/2018/04/12/group-normalization/)
+
+---
