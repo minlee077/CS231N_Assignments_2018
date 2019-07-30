@@ -146,10 +146,9 @@ class CaptioningRNN(object):
         caption_in_embed, cache_embed =word_embedding_forward(captions_in,W_embed)
         
         if(self.cell_type=='rnn'):
-          h, cache_rnn=rnn_forward(caption_in_embed, h_init,Wx,Wh,b)
+          h, cache_rnn = rnn_forward(caption_in_embed, h_init,Wx,Wh,b)
         else:
-          pass
-          
+          h, cache_lstm = lstm_forward(caption_in_embed, h_init, Wx, Wh, b)        
         score, cache_score=temporal_affine_forward(h,W_vocab,b_vocab)
         loss, dscore=temporal_softmax_loss(score,captions_out,mask)
 
@@ -158,7 +157,7 @@ class CaptioningRNN(object):
         if(self.cell_type=='rnn'):
           dcaption_in_embed, dh_init, grads['Wx'], grads['Wh'], grads['b']=rnn_backward(dh,cache_rnn)
         else:
-          pass
+          dcaption_in_embed, dh_init, grads['Wx'], grads['Wh'], grads['b']= lstm_backward(dh,cache_lstm)
         grads['W_embed']=word_embedding_backward(dcaption_in_embed,cache_embed)
         dfeatures, grads['W_proj'], grads['b_proj']=affine_backward(dh_init,cache_init)
 
@@ -227,7 +226,29 @@ class CaptioningRNN(object):
         # NOTE: we are still working over minibatches in this function. Also if   #
         # you are using an LSTM, initialize the first cell state to zeros.        #
         ###########################################################################
-        pass
+        
+        h_init, _ =affine_forward(features,W_proj,b_proj)
+
+        start_embed, _ = word_embedding_forward(self._start,W_embed)
+        
+        h = h_init
+        c_next = np.zeros((h.shape))
+        word_embed = start_embed
+
+        for i in range(max_length):
+          if self.cell_type=='rnn':
+            h, _ = rnn_step_forward(word_embed,h,Wx,Wh,b)
+          else:
+            h, c_next, _ =lstm_step_forward(word_embed,h,c_next,Wx,Wh,b)
+          
+          scores_i, _ =affine_forward(h,W_vocab,b_vocab)
+          # e_x = np.exp(scores_i - np.max(scores_i,axis=1).reshape(-1,1))
+          # prob = e_x / e_x.sum(axis=1).reshape(-1,1) # only difference
+          # for j in range(len(scores_i)):
+          #   captions[j,i] = np.random.choice(scores_i[j],p=prob[j])
+          captions[:, i] = np.argmax(scores_i, axis=1)
+          word_embed, _ =word_embedding_forward(captions[:,i],W_embed)
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
