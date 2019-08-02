@@ -20,3 +20,5 @@ Group Normalization explanation in Korean
 [Reference](https://blog.lunit.io/2018/04/12/group-normalization/)
 
 ---
+
+I used imageio.imread instead of scipy.misc.imread
